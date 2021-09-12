@@ -68,14 +68,6 @@
 			if(a) break;
 		}
 	};
-	//about Object
-	var op=Object.prototype;
-	op.trav=function(fnc){
-		var self=this;
-		Object.keys(this).trav(function(key,i){
-			return fnc(key,self[key],i);
-		});
-	};
 	//about Array
 	var ap=Array.prototype;
 	ap.between=function(num,col){
@@ -1762,10 +1754,11 @@
 		tds.trav(function(d,i){
 			tds[i]=new Array(clng);
 		});
-		t.border=1;
+		//t.border=1;
+		t.style.borderCollapse="collapse";
 		cf.setCss(t,{
 			width:100+"%",
-			height:100+"%",
+			//height:100+"%",
 			textAlign:"center"
 		});
 		around(rlng,function(i){
@@ -1850,10 +1843,22 @@
 		
 		return tds;
 	};
-	ap.lo=function(){
-		if(this.length==0) return undefined;
-		else return this[this.length-1];
+	ap.getRandom=function(){
+		var rn=getRandom(0,this.length-1);
+		log(0,this.length-1,rn);
+		return this[rn];
 	};
+	ap.lastOne=function(){
+		return this[this.length-1];
+	};
+	ap.dtrav=function(fnc){
+		this.trav(function(row,i){
+			row.trav(function(col,j){
+				fnc(row,col,i,j);
+			});
+		});
+	};
+	
 	//about String
 	var sp=String.prototype;
 	sp.xmlparse=function(){
@@ -1949,25 +1954,6 @@
 		}
 		return res;
 	};
-	//2016.05.06 in home by Jae Hyun Lee
-	sp.hasoneof=function(ar,opt){
-		//opt가 true면 idx가 제일 뒤에 있는 일치 항목을 잡는다.
-		var flag=false,
-			con, 
-			idx=-1,
-			l=this;
-		ar.trav(function(chr,i){
-			var chk=opt?l.haslastEx(chr,true):l.has(chr,true);
-			if(chk && chk-1>idx){
-				con=chr;
-				idx=chk-1;
-				flag=true;
-				if(!opt) return true;
-			}
-		});
-		if(!flag) return flag;
-		return {idx:idx,con:con}
-	};
 	//2015.04.09 in RnT by Jae Hyun Lee
 	sp.getWords=function(lmt){
 		var str=this;
@@ -2033,6 +2019,9 @@
 		//2013.8.9
 		//지정한 번호 앞에 element를 삽입해주는 함수, 자기가 지정한 번호의 노드가 됨.
 		this.insertBefore(el,this.childNodes[num]);
+	};
+	op.write=function(str){
+		this.innerHTML=str;
 	};
 	var ip=ImageData.prototype;
 	ip.xy=function(x,y){
@@ -2108,7 +2097,6 @@
 			c.data[t[0]+3]=c.data[t[1]+3];
 		});
 	};
-	
 	var cp=CanvasRenderingContext2D.prototype;
 	cp.test=function(){
 		this.moveTo(0,0);
@@ -2536,7 +2524,6 @@
 			c.clrCompensate(cords,w);
 		};
 	};
-	
 	function gethypotenuse(bottom,vertical){
 		var a;
 		a=bottom*bottom+vertical*vertical;
@@ -2634,6 +2621,7 @@
 		}
 		return y+":"+m+":"+d;
 	};
+	
 	function increase_brightness(rgbcode, percent) {
 		var r = parseInt(rgbcode.slice(1, 3), 16),
 			g = parseInt(rgbcode.slice(3, 5), 16),
@@ -2701,10 +2689,9 @@
 		return [r * 255, g * 255, b * 255];
 	};
 	function getRandom(start,end){
-		var amount=end-start;
-		var rslt=Math.floor(Math.random()*(amount+1)+start);
+		var amount=end-start,
+			rslt=Math.floor(Math.random()*(amount+1)+start);
 		return rslt;
-
 	};
 	
 	window.log=function(){
@@ -2749,27 +2736,33 @@
 		a.innerHTML=str;
 	};
 })(window);
-HTMLElement.prototype.css=function(str){
-	this.style.cssText+=str;
-};
-HTMLElement.prototype.html=function(str){
-	if(str==undefined) return this.innerHTML;
-	else this.innerHTML=str;
-};
-
 function WS(addr,callback){
-	var self=this,
+	var addr="ws://www.jaehyunlee.co.kr:8001",
+		self=this,
 		request_id=0,
 		wsCallbacks={},	//해당 리퀘스트의 콜백함수를 저장한다.
-		wsBroadcast={},
-		wsRequest={},
+		wsBroadcast={
+			report:wsReport,
+			focused:wsFocused,
+			notify:function(obj){log(obj.message)},
+			setGame:wsSetGame,
+			gameStatusChanged:wsGameStatusChanged,
+			gameFinished:wsGameFinished,
+			newConnection:wsNewConnection,
+			newGame:wsNewGame,
+			gameDetail:wsGameDetail
+		},
+		wsRequest={
+			getGameNumber:wsGetGameNumber,
+			getClientInfo:wsGetClientInfo,
+			letClientToGame:wsLetClientToGame,
+			letClientOffGame:wsLetClientOffGame
+		},
 		ws=new WebSocket(addr);
 		
 	ws.onopen=onopen;
 	ws.onmessage=onmessage;
 	ws.onclose=onclose;
-	
-	this.robot_status;
 	
 	this.call=function(obj,fnc){
 		obj.__id=request_id++;
@@ -2797,230 +2790,243 @@ function WS(addr,callback){
 		}
 	};
 	function onclose(){
-		alert("socket server closed!!");
+		log("socket server closed!!");
 	};
-};
-function lsg(key){
-	return localStorage.getItem(key);
-};
-function lss(key,val){
-	localStorage.setItem(key,val);
-};
-function lsr(key){
-	localStorage.removeItem(key);
-};
-function FileManager(str,p){
 	
-	this.mode; //새로쓰기인지 수정인지
-	this.pid;	//새로쓰기가 아니면 pid가 존재한다.
-	
-	var self=this;
-	var table=cf.mkTag("table",p),
-		tr_1=cf.mkTag("tr",table),
-		td_11=cf.mkTag("td",tr_1),
-		td_12=cf.mkTag("td",tr_1),
-		
-		tr_2=cf.mkTag("tr",table),
-		td_22=cf.mkTag("td",tr_2);
-	
-	table.style.fontSize=13+"px";
-	td_22.style.textAlign="center";
-	
-	var name=cf.mkTag("span",td_11);
-	name.innerHTML=str;
-	td_11.rowSpan=2;
-	var ipt=cf.mkTag("input",td_12);
-	ipt.type="file";
-	ipt.style.width=74+"px";
-	var btn=cf.mkTag("button",td_12);
-	btn.innerHTML="가상 파일";
-	
-	td_22.innerHTML=" 선택된 파일 없음";
-	
-	var ids=[];
-	
-	this.send=function(pid,fnc){
-		var am=new ASYNCmANAGER(),
-			lmt=ids.length,
-			cnt=0;
-		if(cnt==lmt) fnc();
-		ids.trav(function(id,i){
-			am.post("setFilePid",{id:id,pid:pid},function(response){
-				cnt++;
-				if(cnt==lmt) fnc();
-			});
-		});
-	};
-	this.cancel=function(fnc){
-		var am=new ASYNCmANAGER(),
-			lmt=ids.length,
-			cnt=0;
-		if(cnt==lmt) fnc();
-		ids.trav(function(id,i){
-			am.post("data/delFile.php",{id:id},function(response){
-				//log("response",response,id,pid);
-				cnt++;
-				if(cnt==lmt) fnc();
-			});
-		});
-	};
-	this.onselect=function(){};
-	ipt.onchange=function(){
-		var am=new ASYNCmANAGER(),
-			file=ipt.files[0],
-			param={
-				pid:self.mode?0:self.pid,
-				attach:file,
-				fileName:file.name,
-				stamp:new Date().getTime()
-			};
-		if(file)
-			am.file("regFile",param,function(data){
-				ids.push(data.response);
-				self.onselect(ids);
-			});
-		else
-			fnc("no file");
-	};
-	btn.onclick=btnclick;
-	function btnclick(){
-		var cw=document.body.clientWidth*9/10,
-			ch=document.body.clientHeight*9/10,
-			pop=new popup(cw,ch);
-		pop.con.style.cssText+="padding:10px;";
-		pop.con.innerHTML="";
-		dl.getboardtree(function(arr){
-			mkFileExplorer(arr,pop);
-		});
-		
-		function mkFileExplorer(arr,pop){
-			var tb=cf.mkTable(1,2,pop.con),
-				jsn=cf.arToJson(arr),
-				tree=new EXPLORER(jsn,tb.cells[0][0]);
-				tree.setHeader(true);
-				
-			cf.setCss(tb.table,{textAlign:"left",verticalAlign:"top",width:cw+"px",marginTop:20+"px"});
-			cf.setCss(tb.cells[0][0],{width:25+"%",height:680+"px"});
-			cf.setCss(tb.cells[0][1],{verticalAlign:"top"});
-			
-			var cover=cf.mkTag("div",tb.cells[0][1]);
-			cover.style.cssText="border:1px solid gray;height:680px;overflow:auto;vertical-align:top;";
-					
-			var btns=cf.mkTag("div",cover),
-				btn=cf.mkTag("button",btns),
-				cancel=cf.mkTag("button",btns),
-				table=cf.mkTag("table",cover),
-				tr=cf.mkTag("tr",table),
-				tbody=cf.mkTag("tbody",table);
-			
-			btns.style.cssText="padding:5px;";
-			btn.innerHTML="첨부";
-			cancel.innerHTML="취소";
-			btn.onclick=function(){
-				var names=[];
-				tbody.children.trav(function(tr,i){
-					var chk=tr.children[0].children[0];
-					if(chk.checked) names.push(chk.file_name);
-				});
-				if(names.length>0){
-					var am=new ASYNCmANAGER(),
-						lmt=names.length,
-						cnt=0;
-					names.trav(function(name,i){
-						var	param={
-								pid:self.mode?0:self.pid,
-								name:name,
-								stamp:new Date().getTime()
-							};
-						am.post("regFileLink",param,res=>{							
-							ids.push(res.response);
-							cnt++;
-							if(lmt==cnt){
-								self.onselect(ids);
-								cancel.onclick();
-							}
-						});
-					});
-				}
-			};
-			cancel.onclick=function(){
-				pop.terminate();
-			};
-				
-			table.style.cssText="font-size:12px;width:100%;text-align:center;";
-			tr.style.cssText="font-weight:bold;font-size:14px;";
-			["선택","파일명","게시판명","이미지"].trav(function(str,i){
-				var td=cf.mkTag("td",tr);
-				td.style.cssText="background-color:#eee;";
-				td.innerHTML=str;
-			});
-			
-			tree.fncSel=function(ob,el){
-				tbody.innerHTML="";
-				if(ob.kind=="root") return;
-				/* post("data/getFilesByMenuId.php",{id:el.key},function(response){
-					log(response);
-					return;
-					var data=JSON.parse(response).result;
-					if(!data) return;
-					mkFileRow(data);
-				}); */
-				call.api("getFilesByMenuId",{id:el.key},res=>{
-					var data=res.response;
-					if(!data || data.length==0) return;
-					mkFileRow(data);
-				});
-			};
-			
-			function mkFileRow(data){
-				data.trav(function(file,i){
-					var tr=cf.mkTag("tr",tbody),
-						ipt_td=cf.mkTag("td",tr),
-						ipt=cf.mkTag("input",ipt_td),
-						name=cf.mkTag("td",tr),
-						menu=cf.mkTag("td",tr),
-						img_td=cf.mkTag("td",tr),
-						cover=cf.mkTag("div",img_td),
-						img=cf.mkTag("img",cover);
-					
-					ipt_td.style.cssText="border-bottom:1px solid #eee;";
-					ipt.type="checkbox";
-					ipt.file_name=file.file_name;
-					
-					name.style.cssText="14px;font-weight:bold;border-bottom:1px solid #eee;";
-					name.innerHTML=mkFileName(file.file_name);
-					
-					menu.style.cssText="border-bottom:1px solid #eee;";
-					menu.innerHTML=file.menu_name;
-					
-					img_td.style.cssText="border-bottom:1px solid #eee;text-align:center;";
-					
-					cover.style.cssText="max-height:200px;overflow:auto;text-align:center;";
-					img.width=239;
-					img.src="img/upload/"+file.file_name.split("/").lo();
-				});
-			};
+	function wsGetGameNumber(obj){
+		obj.response={
+			gameNumber:sessionStorage.getItem("game_number")
 		};
+		send(obj);
 	};
-};
-function popup(w,h){
-	var div=cf.mkAbsoluteDiv(0,0,cf.workareawidth,cf.workareaheight,document.body),
-		con=cf.mkAbsoluteDiv(cf.workareawidth/2-w/2,cf.workareaheight/2-h/2,w,h,div),
-		exbox=cf.mkAbsoluteDiv(w-30,0,30,30,con);	div.bg();
-	cf.setCss(div,{position:"fixed",zIndex:100,left:0+"px",top:0+"px",width:cf.workareawidth+"px",height:cf.workareaheight+"px"});
-	cf.setCss(con,{backgroundColor:"white",overflow:"auto"});
-	cf.setCss(exbox,{zIndex:100});
-	
-	exbox.onclick=function(){
-		cf.killTag(div);
+	function wsGetClientInfo(obj){
+		obj.response={
+			gameNumber:sessionStorage.getItem("game_number"),
+			sessionNumber:sessionStorage.getItem("session_number"),
+			currentPage:location.href
+		};
+		send(obj);
+	};
+	function wsLetClientToGame(obj){
+		log("letClientToGame");
+		var mode=obj.userInfo.gameMode;
+		location.href=mode+".html";
+	};
+	function wsLetClientOffGame(obj){
+		log("letClientOffGame");
+		alert("게임이 취소되었습니다.");
+		location.href="mode.html";
 	};
 	
-	return {con:con,kill:exbox.onclick,terminate:exbox.onclick};	
+	function wsGameDetail(obj){
+		if(elGameNumber.innerHTML==obj.response.gameNumber) mkGameDetail(obj.response);
+		if(!obj.response.onGame) getAllGameInfo();
+	};
+	function wsNewGame(obj){
+		makeGameProcess(obj.response);
+	};
+	function wsNewConnection(obj){
+		mkUserStatus(obj.response);
+	};
+	function wsGameFinished(obj){
+		gameFinished(obj);
+	};
+	function wsGameStatusChanged(obj){
+		gameDecision(obj);
+	};
+	function wsSetGame(obj){
+		sessionStorage.setItem("game_number",obj.game_number);
+		location.href=obj.game_type+".html";
+	};
+	function wsReport(obj){
+		var sn=sessionStorage.getItem("session_number"),
+			param={
+				__command:"report",
+				__session_number:sn
+			};
+		ws.call(param);
+	};
+	function wsFocused(obj){
+		alert(11);
+		var sn=sessionStorage.getItem("session_number"),
+			param={
+				__command:"focused",
+				__session_number:sn
+			};
+		ws.call(param);
+	};
+	function wsSend(obj){
+		obj.__command="clientResponse";
+		ws.call(obj,function(data){
+			//dir(data);
+		});
+	};
+	function send(obj){
+		obj.__command="clientResponse";
+		self.call(obj,function(resp){
+			//dir(resp);
+		});
+	};
+	
 };
-function mkFileName(str){
-	var ar=str.split("_");
-	ar.shift();
-	return ar.join("_");
+
+function gr(num){
+	return getRandom(0,num);
+};
+function getRandom(start,end){
+	var amount=end-start,
+		rslt=Math.random()*(amount+1)+start;
+	return parseInt(rslt);
+};
+function get(addr,param,header,callback){
+	var a=new ajaxcallforgeneral(),
+		str=[];
+	for(var el in param){
+		str.push(el+"="+param[el]);
+	}
+	str=str.join("&");
+	a.jAjax(addr+"?"+str, header);
+	a.ajaxcallback=callback;
+};
+function jFile(addr,param,callback){
+	var a=new ajaxcallforgeneral();
+	a.file(addr,param);
+	a.ajaxcallback=callback;
+};
+function post(addr,param,header,callback){
+	var a=new ajaxcallforgeneral(),
+		str=[];
+	if(header["Content-Type"]=="application/json"){
+		str=JSON.stringify(param);
+	}else{
+		for(var el in param) str.push(el+"="+encodeURIComponent(param[el]));
+		str=str.join("&");		
+	}
+	a.post(addr,str,header);
+	a.ajaxcallback=callback;
+};
+function MAPPER(a,b,x){
+	var A=a,
+		B=b,
+		X=x,
+		rX={},
+		xleft=[],
+		xright=[];
+	
+	procX();
+	
+
+	this.getA=function(){
+		return copy(A);
+	};
+	this.getB=function(){
+		return copy(B);
+	};
+	this.setObject=function(obj){
+		for(var el in obj){
+			this.setValue(el,obj[el]);
+		}
+		
+	};
+	this.setValue=function(str,val){
+		//step1: find X
+		var lr;
+		xleft.trav(function(d,i){
+			if(d==str){
+				lr=true;
+				return true;
+			}
+		});
+		xright.trav(function(d,i){
+			if(d==str){
+				lr=false;
+				return true;
+			}
+		});
+		if(lr==undefined){
+		
+			if(A[str]!=undefined) A[str]=val;
+		
+			if(B[str]!=undefined) B[str]=val;
+		}else{
+			var ttr=lr?X[str]:rX[str];
+			if(A[str]!=undefined) A[str]=val;
+			if(A[ttr]!=undefined) A[ttr]=val;
+			if(B[str]!=undefined) B[str]=val;
+			if(B[ttr]!=undefined) B[ttr]=val;
+		}
+		
+	};
+	function copy(obj){
+		var ob={};
+		for(var el in obj){
+			ob[el]=obj[el];
+		}
+		return obj;
+		
+	};
+	function procX(){
+		for(var el in X){
+			xleft.push(el);
+			xright.push(X[el]);
+			rX[X[el]]=el;
+		}
+		
+	};
+
+};
+function ASYNCmANAGER(){
+	var Q=[],
+		ing=false,
+		active=false;
+	this.get=function(url,callback){
+		Q.push({method:"get",url:url,callback:callback});
+		if(!active) activate();			//통신이 잠자고 있으면 깨운다.
+	};
+	this.post=function(url,param,callback){
+		Q.push({method:"post",url:url,param:param,callback:callback});
+		if(!active) activate();			//통신이 잠자고 있으면 깨운다.
+	};
+	this.file=function(url,param,callback){
+		Q.push({method:"file",url:url,param:mkFileParam(param),callback:callback});
+		if(!active) activate();			//통신이 잠자고 있으면 깨운다.
+	};
+	function activate(){
+		active=true;					//active 모드를 활성화하면, 큐를 순회하면서 통신을 하고 있다는 뜻이다.
+		var t=setInterval(function(){
+			if(ing) return;
+			if(Q.length>0){
+				var tr=Q.shift();
+				ing=true;
+				if(tr.method=="post")
+					post(tr.url,tr.param,function(res){
+						ing=false;
+						tr.callback(res);
+					});
+				else if(tr.method=="get")
+					get(tr.url,function(res){
+						ing=false;
+						tr.callback(res);
+					});
+				else if(tr.method=="file")
+					jFile(tr.url,tr.param,function(res){
+						ing=false;
+						tr.callback(res);
+					});
+			}else{
+				clearInterval(t);
+				active=false;			//큐에 통신할 것이 남아있지 않으면 인터벌을 중지한다.
+			}
+		},10);
+	};
+
+	function mkFileParam(obj){
+		var fd=new FormData();
+		trav(obj,function(el,val,i){
+			fd.append(el,val);
+		});
+		return fd;
+	};
 };
 
 var layerPopPriority=1001,
@@ -3116,112 +3122,179 @@ function layerPrompt(str,round,def,fnc){
 		if(fnc) fnc(ipt.value);
 	};
 };
-function get(addr,param,callback){
-	var a=new ajaxcallforgeneral(),
-		str=[];
-	for(var el in param){
-		str.push(el+"="+param[el]);
-	}
-	str=str.join("&");
-	a.jAjax(addr+"?"+str);
-	a.ajaxcallback=callback;
-};
-function jFile(addr,param,callback){
-	var a=new ajaxcallforgeneral();
-	a.file(addr,param);
-	a.ajaxcallback=callback;
-};
-function post(addr,param,callback){
-	var a=new ajaxcallforgeneral(),
-		str=[];
-	
-	for(var el in param)
-		str.push(el+"="+encodeURIComponent(param[el]));
-	
-	str=str.join("&");
-	
-	a.post(addr,str);
-	a.ajaxcallback=callback;
-};
-function ASYNCmANAGER(){
-	var Q=[],
-		ing=false,
-		active=false;
-	this.get=function(url,callback){
-		Q.push({method:"get",url:url,callback:callback});
-		if(!active) activate();			//통신이 잠자고 있으면 깨운다.
-	};
-	this.post=function(url,param,callback){
-		Q.push({method:"post",url:url,param:param,callback:callback});
-		if(!active) activate();			//통신이 잠자고 있으면 깨운다.
-	};
-	this.file=function(url,param,callback){
-		//Q.push({method:"file",url:url,param:mkFileParam(param),callback:callback});
-		Q.push({method:"file",url:url,param:param,callback:callback});
-		if(!active) activate();			//통신이 잠자고 있으면 깨운다.
-	};
-	function activate(){
-		active=true;					//active 모드를 활성화하면, 큐를 순회하면서 통신을 하고 있다는 뜻이다.
-		var t=setInterval(function(){
-			if(ing) return;
-			if(Q.length>0){
-				var tr=Q.shift();
-				ing=true;
-				if(tr.method=="post")
-					call.api(tr.url,tr.param,res=>{
-						ing=false;
-						tr.callback(res);
-					});
-				else if(tr.method=="get")
-					get(tr.url,res=>{
-						ing=false;
-						tr.callback(res);
-					});
-				else if(tr.method=="file"){
-					//#1. 파일전송
-					var fd=new FormData();
-					fd.append("fileName",tr.param.fileName);
-					fd.append("file",tr.param.attach);
-					fd.append("stamp",tr.param.stamp);
-					sendFile(fd,data=>{
-						tr.param.fileName=data.path;
-						//#2. 데이터전송
-						call.api(tr.url,tr.param,res=>{
-							ing=false;
-							tr.callback(res);
-						});
-					});
-					/* var reader=new FileReader();
-					reader.readAsBinaryString(tr.param.attach);
-					reader.onload=fileload;
-					function fileload(e){
-						tr.param.attach=e.target.result;
-						call.api(tr.url,tr.param,res=>{
-							ing=false;
-							tr.callback(res);
-						});
-					}; */
-				}
-			}else{
-				clearInterval(t);
-				active=false;			//큐에 통신할 것이 남아있지 않으면 인터벌을 중지한다.
-			}
-		},10);
-	};
-	function sendFile(fd,callback){
-		var addr="https://mnemosynesolutions.co.kr/boardFile";
-		jFile(addr,fd,data=>{
-			data=JSON.parse(data);
-			callback(data);
-		});
-	};
-	function mkFileParam(obj){
-		var fd=new FormData();
-		for(var el in obj){
-			var val=obj[el];
-			fd.append(el,val);
-		}
+function getGameDetail(ob){
+	var num=ob.gameNumber,
+		story=ob.history,
+		res=[[
+			"라운드",
+			"투자액",
+			"전달액",
+			"분배액",
+			"투자자<br>배당액(율)",
+			"투자자<br>이익액(율)",
+			"분배자<br>이익액(율)",
+			"투자자<br>잔고",
+			"분배자<br>잔고"
+		]];
 		
-		return fd;
+	var sumInv=0,
+		sumSaveInv=0,
+		sumDiv=0,
+		sumProfitRateInv=0,
+		sumProfitRateDiv=0;	
+		
+	story.trav(function(ar,i){
+		
+		ar[0]*=1;
+		ar[1]*=1;
+		
+		sumInv+=ar[0]*1;
+		sumSaveInv+=conf.invest_limit*1-ar[0];
+		sumDiv+=ar[1]*1;
+		
+		var saveInv=conf.invest_limit*1-ar[0],
+			balanceInv=(i+1)*conf.invest_limit-sumInv+sumDiv,
+			balanceDiv=sumInv*3-sumDiv,
+			profitRateInv=ar[1]/ar[0]-1,
+			profitRateSaveInv=(ar[1]+saveInv)/ar[0]-1,
+			profitRateDiv=(ar[0]*3-ar[1])/ar[0];
+			
+		sumProfitRateInv+=ar[1]-ar[0];
+		sumProfitRateDiv+=ar[0]*3-ar[1];		
+		
+		res.push([
+			i+1,			//라운드
+			ar[0],			//투자액
+			ar[0]*3,		//전달액
+			ar[1],			//분배액
+			(ar[1]-ar[0])+"("+cf.rommify(profitRateInv,2)+")",	//투자자<br>이익액(율)
+			(ar[1]-ar[0]+saveInv)+"("+cf.rommify(profitRateSaveInv,2)+")",	//투자자<br>이익액(율)
+			(ar[0]*3-ar[1])+"("+cf.rommify(profitRateDiv,2)+")",	//분배자<br>이익액(율)
+			balanceInv,		//투자자<br>잔고
+			balanceDiv		//분배자<br>잔고
+		]);
+	});
+	//합계 삽입
+	res.push([
+			"합계",			//라운드
+			sumInv,			//투자액
+			sumInv*3,		//전달액
+			sumDiv,			//분배액
+			sumProfitRateInv+"("+cf.rommify((sumDiv/sumInv-1),2)+")",	//투자자<br>이익액(율)
+			(sumProfitRateInv+sumSaveInv)+"("+cf.rommify(((sumDiv+sumSaveInv)/sumInv-1),2)+")",	//투자자<br>이익액(율)
+			sumProfitRateDiv+"("+cf.rommify((sumInv*3-sumDiv)/sumInv,2)+")",	//분배자<br>이익액(율)
+			"-",		//투자자<br>잔고
+			"-"		//분배자<br>잔고
+		]);
+	return res;
+};
+function mkGameDetail(ob,p){
+	if(p) var elGameDetail=p;
+	elGameDetail.innerHTML="";
+	var num=ob.gameNumber,
+		story=ob.history,
+		res=[[
+			"라운드",
+			"투자액",
+			"전달액",
+			"분배액",
+			"투자자<br>배당액(율)",
+			"투자자<br>이익액(율)",
+			"분배자<br>이익액(율)",
+			"투자자<br>잔고",
+			"분배자<br>잔고"
+		]];
+	
+	if(window["elGameNumber"]) elGameNumber.innerHTML=ob.gameNumber;
+	
+	var sumInv=0,
+		sumSaveInv=0,
+		sumDiv=0,
+		sumProfitRateInv=0,
+		sumProfitRateDiv=0;
+		
+	story.trav(function(ar,i){
+		
+		ar[0]*=1;
+		ar[1]*=1;
+		
+		sumInv+=ar[0]*1;
+		sumSaveInv+=conf.invest_limit*1-ar[0];
+		sumDiv+=ar[1]*1;
+		
+		var saveInv=conf.invest_limit*1-ar[0],
+			balanceInv=(i+1)*conf.invest_limit-sumInv+sumDiv,
+			balanceDiv=sumInv*3-sumDiv,
+			profitRateInv=ar[1]/ar[0]-1,
+			profitRateSaveInv=(ar[1]+saveInv)/ar[0]-1,
+			profitRateDiv=(ar[0]*3-ar[1])/ar[0];
+			
+		sumProfitRateInv+=ar[1]-ar[0];
+		sumProfitRateDiv+=ar[0]*3-ar[1];		
+		
+		res.push([
+			i+1,			//라운드
+			ar[0],			//투자액
+			ar[0]*3,		//전달액
+			ar[1],			//분배액
+			(ar[1]-ar[0])+"("+cf.rommify(profitRateInv,2)+")",	//투자자<br>이익액(율)
+			(ar[1]-ar[0]+saveInv)+"("+cf.rommify(profitRateSaveInv,2)+")",	//투자자<br>이익액(율)
+			(ar[0]*3-ar[1])+"("+cf.rommify(profitRateDiv,2)+")",	//분배자<br>이익액(율)
+			balanceInv,		//투자자<br>잔고
+			balanceDiv		//분배자<br>잔고
+		]);
+	});
+	//합계 삽입
+	res.push([
+			"합계",			//라운드
+			sumInv,			//투자액
+			sumInv*3,		//전달액
+			sumDiv,			//분배액
+			sumProfitRateInv+"("+cf.rommify((sumDiv/sumInv-1),2)+")",	//투자자<br>이익액(율)
+			(sumProfitRateInv+sumSaveInv)+"("+cf.rommify(((sumDiv+sumSaveInv)/sumInv-1),2)+")",	//투자자<br>이익액(율)
+			sumProfitRateDiv+"("+cf.rommify((sumInv*3-sumDiv)/sumInv,2)+")",	//분배자<br>이익액(율)
+			"-",		//투자자<br>잔고
+			"-"		//분배자<br>잔고
+		]);
+	
+	var cells=res.mkTable({
+		p:elGameDetail,
+		r:[],c:[],
+		mode:false
+	});
+	cells.dtrav(function(r,c,i,j){
+		if(i==0) c.css("background-color:#aaa;font-size:13px;padding:5px;font-weight:bold;");
+		else c.css("border-bottom:1px solid #ddd;font-size:13px;");
+		c.css("padding:5px;");
+		if(i!=0 && (j==1 || j==3)) c.css("font-weight:bold");
+		if(i!=0 && (j==4 || j==5 || j==6)) c.css("color:red;");
+		if(i!=0 && (j==7 || j==8)) c.css("color:blue;");
+		if(i==cells.length-1) c.css("background-color:#aaa;font-size:13px;padding:5px;font-weight:bold;");
+		if(i==cells.length-2 && j>6) c.css("font-weight:bold;background-color:#aaa;");
+		
+		if(c.innerHTML=="undefined") c.innerHTML="";
+		if(c.innerHTML=="NaN") c.innerHTML="-";
+		if(c.innerHTML=="NaN(NaN)") c.innerHTML="-";
+		if(c.innerHTML=="0(NaN)") c.innerHTML="-";
+		
+	});
+	
+	if(window["elInvestorDetail"]) mkParticipantDetail(ob.investor_detail,ob.trustee_detail);
+	
+	function mkParticipantDetail(investor,trustee){
+		elInvestorDetail.innerHTML="";
+		elTrusteeDetail.innerHTML="";
+		
+		var inv=cf.mkTag("div",elInvestorDetail),
+			tru=cf.mkTag("div",elTrusteeDetail);
+		
+		inv.css("padding-left:50px;padding-top:10px;");
+		tru.css("padding-left:50px;padding-top:10px;");
+		
+		inv.innerHTML="이름: <b>"+investor.userName+"</b><br>이메일: <b>"+investor.userEmail+"</b>";
+		tru.innerHTML="이름: <b>"+trustee.userName+"</b><br>이메일: <b>"+trustee.userEmail+"</b>";
 	};
+};
+HTMLElement.prototype.css=function(str){
+	this.style.cssText+=str;
 };

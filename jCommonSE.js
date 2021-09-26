@@ -36,10 +36,16 @@ function ajaxcallforgeneral(){
 		j.xmlHttp.send(prm);
 		
 	};
-	this.file=function(addr,prm){
+	this.file=function(addr, prm, header) {
 		j.xmlHttp=new XMLHttpRequest();
 		j.xmlHttp.onreadystatechange=on_ReadyStateChange;
 		j.xmlHttp.open("POST", addr, true);
+		
+		Object.keys(header).trav(key=>{
+			var val=header[key];
+			j.xmlHttp.setRequestHeader(key,val);
+		});
+		
 		j.xmlHttp.send(prm);
 	};
 	function on_ReadyStateChange(){

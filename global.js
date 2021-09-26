@@ -2888,9 +2888,9 @@ function get(addr,param,header,callback){
 	a.jAjax(addr+"?"+str, header);
 	a.ajaxcallback=callback;
 };
-function jFile(addr,param,callback){
+function jFile(addr, param, header, callback){
 	var a=new ajaxcallforgeneral();
-	a.file(addr,param);
+	a.file(addr, param, header);
 	a.ajaxcallback=callback;
 };
 function post(addr,param,header,callback){

@@ -1,11 +1,11 @@
 const header = { 'Content-Type': 'application/json' };
 
+/* 
 const url = 'http://localhost:';
 const port = '3000'; 
-/* 
+*/
 const url = 'http://dev.lulla.co.kr:';
 const port = '80';
-*/
 
 const token = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6ImQzN2I1NGEwLTgwN2ItMTFlYi1iYzdjLWRmNGFjZWM3YTRkOSIsIm5hbWUiOiJqYWVoeXVubGVlIiwiZXhwIjoxNjYwODI1NzM5LjIyLCJpYXQiOjE2Mjk3MjE3Mzl9.PDQ36-krf9JGhPKXYMcFdOQdKzVa27H_pOMHP3fmvR8";
 
@@ -16,8 +16,35 @@ const token = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6ImQzN2I1NGEwLTgwN2It
 // delClass();
 // getMember();
 // setMember();
-uploadImage();
+// uploadImage();
+// uploadBackgroundImage();
 
+function uploadBackgroundImage(){
+  const addr = url + port + '/api/member/background-image';   //끝에 슬래시를 붙이지 않는다.
+  log(addr);
+  const header = { 
+    //'Content-Type': 'multipart/form-data',
+    authorization: "Bearer " + token,
+  };
+
+  const ipt = document.createElement('input');
+  ipt.type = 'file';
+  document.body.appendChild(ipt);
+
+  ipt.onchange = function(){
+    const file = this.files[0];
+    const param = new FormData();
+    param.append('file', file);
+    param.append('member_id', '5e25e7ce-0ea1-11ec-af59-0242ac110003');
+  
+    jFile(addr, param, header, res => {
+      log(res);
+      var data = JSON.parse(res);
+      dir(data);
+    });
+  };
+
+};
 function uploadImage(){
   const addr = url + port + '/api/member/image';   //끝에 슬래시를 붙이지 않는다.
   log(addr);
@@ -52,8 +79,8 @@ function setMember(){
     member_id: '5e25e7ce-0ea1-11ec-af59-0242ac110003',
     nickname: '업데이트',
     member_description: '업데이트 테스트입니다.',
-    image_id: 'c4815d40-80f4-11eb-b4e8-ed455a9330ea',
-    background_image_id: 'b5e6c2a0-806a-11eb-9944-815ce606479f',
+    image_id: '',
+    background_image_id: '',
   };
   post(addr, param, header, res => {
     log(res);

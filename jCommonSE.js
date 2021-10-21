@@ -12,9 +12,9 @@ function ajaxcallforgeneral(){
         j.xmlHttp.setRequestHeader(key,val);
       });
     }
-		j.xmlHttp.send(null);		
+		j.xmlHttp.send(null);
 	};
-	this.post=function(addr,prm,header){
+	this.post=function(addr, prm, header){
 		j.xmlHttp=new XMLHttpRequest();
 		j.xmlHttp.onreadystatechange=on_ReadyStateChange;
 		j.xmlHttp.open("POST", addr, true);
@@ -32,7 +32,15 @@ function ajaxcallforgeneral(){
 		}else{
 			j.xmlHttp.setRequestHeader("Content-Type","application/x-www-form-urlencoded");
 		}
-			
+
+		/* if(header){
+			Object.keys(header).trav((key) => {
+				if (key === 'Content-Type') return;
+				var val = header[key];
+				console.log(key, val);
+				j.xmlHttp.setRequestHeader(key, val);
+			});
+		} */
 		j.xmlHttp.send(prm);
 		
 	};

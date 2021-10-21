@@ -2893,16 +2893,16 @@ function jFile(addr, param, header, callback){
 	a.file(addr, param, header);
 	a.ajaxcallback=callback;
 };
-function post(addr,param,header,callback){
+function post(addr, param, header, callback){
 	var a=new ajaxcallforgeneral(),
 		str=[];
-	if(header["Content-Type"]=="application/json"){
+	if(header["Content-Type"] === "application/json"){
 		str=JSON.stringify(param);
 	}else{
 		for(var el in param) str.push(el+"="+encodeURIComponent(param[el]));
 		str=str.join("&");		
 	}
-	a.post(addr,str,header);
+	a.post(addr, str, header);
 	a.ajaxcallback=callback;
 };
 function MAPPER(a,b,x){

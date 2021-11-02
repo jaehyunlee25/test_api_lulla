@@ -1,14 +1,14 @@
 const header = { 'Content-Type': 'application/json' };
 
-/*
 const url = 'http://localhost:';
 const port = '3000';
-*/
+/*
 
 const url = 'http://dev.lulla.co.kr:';
 const port = '1000';
+*/
 
-const token = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6ImQzN2I1NGEwLTgwN2ItMTFlYi1iYzdjLWRmNGFjZWM3YTRkOSIsIm5hbWUiOiJqYWVoeXVubGVlIiwiZXhwIjoxNjY0NDY1NTgzLjkxLCJpYXQiOjE2MzMzNjE1ODN9.W31hyZNREhfrUyR2R4cYignn2AKSxncXMBnhSYrjpvI";
+const token = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6ImQzN2I1NGEwLTgwN2ItMTFlYi1iYzdjLWRmNGFjZWM3YTRkOSIsIm5hbWUiOiJqYWVoeXVubGVlIiwiZXhwIjoxNjY2Mjg2Mzg4LjAyNywiaWF0IjoxNjM1MTgyMzg4fQ.XWtuurXyvk-ertKA2ZRhfclzEIimOukSMML6K-QRVeo";
 
 //signup('local','naver');
 signin('local','google');
@@ -19,12 +19,28 @@ signin('local','google');
 //resetPassword('123456');
 //getUserIdFromToken();
 
-const type = 0;
-//generateCode(type);
-//matchCode(8236, type);
+// const type = 0;
+// generateCode(type);
+// matchCode(8236, type);
 
-//school();
+// school();
+// registerToken();
 
+function registerToken() {
+  const addr = url + port + '/api/auth/register-token';   //끝에 슬래시를 붙이지 않는다.
+  header.authorization = "Bearer " + token;
+  const param = {
+    user_info: {
+      device_token: 'dfsfgsdfgsdfgsdfgsdfsfd',
+      type: 0
+    }
+  };
+  post(addr, param, header, res => {
+    log(res);
+    var data = JSON.parse(res);
+    dir(data);
+  });
+};
 function school(){
   //const addr = url + port + '/api/school/';
   const addr = url + port + '/api/school';   //끝에 슬래시를 붙이지 않는다.

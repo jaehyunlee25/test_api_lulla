@@ -376,7 +376,7 @@ function userPostList() {
   post(addr, param, header, res => {
     log(res);
     var data = JSON.parse(res);
-    dir(data);
+    imgEl.src = res;
   });
 };
 function userPostUpdate() {

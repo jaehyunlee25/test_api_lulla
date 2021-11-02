@@ -1,0 +1,57 @@
+<!doctype html>
+<html>
+	<head>
+		<meta charset="utf-8" />
+		<title>apiTest</title>
+		<script src="global.js"></script>
+		<script src="jCommonSE.js"></script>
+	</head>
+	<body>
+		<div style="width:1000px;margin:auto;">
+			<h1 style="text-align:center;">(주) 랄라 DeepFace 테스트 - Case '1 to 1' : <button id="btnMove">1 to N</button></h1>
+			<button id="btnCompare">COMPARE</button>
+			<table border=1 style="text-align:center;">
+				<tr>
+					<td style="width:50%;">first image <button id="btnOne">detect</button></td>
+					<td style="width:50%;">second image <button id="btnTwo">detect</button></td>
+				</tr>
+				<tr>
+					<td>
+						<div id="elCover1" style="display:inline-block;position:relative;">
+							<img src='http://jaehyunlee.co.kr:8080/image/jhlee_1.jpg' style="max-width: 500px;" />
+							<div id="elBox1" style="display:none;position:absolute;top:10px;left:10px;width:50px;height:50px;border:5px solid yellow;"></div>
+						</div>
+					</td>
+					<td>
+						<div  id="elCover2"  style="display:inline-block;position:relative;">
+							<img src='http://jaehyunlee.co.kr:8080/image/jhlee_2.jpg' style="max-width: 500px;" />
+							<div id="elBox2" style="display:none;position:absolute;top:10px;left:10px;width:50px;height:50px;border:5px solid yellow;"></div>
+						</div>
+					</td>
+				</tr>
+				<tr>
+					<td>
+						<div><button id="btnAnOne" style="display:none;">analyze</button></div>
+						<img id="imgDetOne" style="max-width: 200px;" />
+					</td>
+					<td>
+						<div><button id="btnAnTwo" style="display:none;">analyze</button></div>
+						<img id="imgDetTwo" style="max-width: 200px;" /> 
+					</td>
+				</tr>
+				<tr>
+					<td>
+						<div id="elInfo1" style="text-align:left;padding-left: 20px;"></div>
+					</td>
+					<td>
+						<div  id="elInfo2" style="text-align:left;padding-left: 20px;"></div>
+					</td>
+				</tr>
+				<tr>
+					<td id="elCompare" colspan=2 style="text-align: left;padding-left: 250px;"></td>
+				</tr>
+			</table>
+		</div>
+		<script src="index.js"></script>
+	</body>
+</html>

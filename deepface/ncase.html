@@ -1,0 +1,83 @@
+<!doctype html>
+<html>
+	<head>
+		<meta charset="utf-8" />
+		<title>apiTest</title>
+		<script src="global.js"></script>
+		<script src="jCommonSE.js"></script>
+	</head>
+	<body>
+		<div style="width:1500px;margin:auto;">
+			<h1 style="text-align:center;">(주) 랄라 DeepFace 테스트 - Case '1 to N' : <button id="btnMove">1 to 1</button></h1>
+			<button id="btnFind">FIND</button>
+			<table border=1 style="text-align:center;">
+				<tr>
+					<td style="width:30%;">target image</td>
+					<td style="width:80%;">images</td>
+				</tr>
+				<tr>
+					<td>
+						<div id="elCover1" style="display:inline-block;position:relative;">
+							<img src='http://jaehyunlee.co.kr:8080/image/jhlee_1.jpg' style="max-width: 500px;" />
+							<div id="elBox1" style="display:none;position:absolute;top:10px;left:10px;width:50px;height:50px;border:5px solid yellow;"></div>
+						</div>
+					</td>
+					<td>
+						<div  id="elCover8"  style="display:inline-block;position:relative;">
+							<img src='http://jaehyunlee.co.kr:8080/image/jjhee_3.jpg' style="max-width: 200px;" />
+							<div id="elBox8" style="display:none;position:absolute;top:10px;left:10px;width:50px;height:50px;border:5px solid yellow;"></div>
+						</div>
+						<div  id="elCover3"  style="display:inline-block;position:relative;">
+							<img src='http://jaehyunlee.co.kr:8080/image/jhlee_3.jpg' style="max-width: 200px;" />
+							<div id="elBox3" style="display:none;position:absolute;top:10px;left:10px;width:50px;height:50px;border:5px solid yellow;"></div>
+						</div>
+						<div  id="elCover4"  style="display:inline-block;position:relative;">
+							<img src='http://jaehyunlee.co.kr:8080/image/jhlee_4.jpg' style="max-width: 200px;" />
+							<div id="elBox4" style="display:none;position:absolute;top:10px;left:10px;width:50px;height:50px;border:5px solid yellow;"></div>
+						</div>
+						<div  id="elCover11"  style="display:inline-block;position:relative;">
+							<img src='http://jaehyunlee.co.kr:8080/image/gorilla.jpg' style="max-width: 200px;" />
+							<div id="elBox11" style="display:none;position:absolute;top:10px;left:10px;width:50px;height:50px;border:5px solid yellow;"></div>
+						</div>
+						<div  id="elCover5"  style="display:inline-block;position:relative;">
+							<img src='http://jaehyunlee.co.kr:8080/image/jhlee_5.jpg' style="max-width: 200px;" />
+							<div id="elBox5" style="display:none;position:absolute;top:10px;left:10px;width:50px;height:50px;border:5px solid yellow;"></div>
+						</div>
+						<div  id="elCover6"  style="display:inline-block;position:relative;">
+							<img src='http://jaehyunlee.co.kr:8080/image/jhlee_6.jpg' style="max-width: 200px;" />
+							<div id="elBox6" style="display:none;position:absolute;top:10px;left:10px;width:50px;height:50px;border:5px solid yellow;"></div>
+						</div>
+						<div  id="elCover7"  style="display:inline-block;position:relative;">
+							<img src='http://jaehyunlee.co.kr:8080/image/jjhee_1.jpg' style="max-width: 200px;" />
+							<div id="elBox7" style="display:none;position:absolute;top:10px;left:10px;width:50px;height:50px;border:5px solid yellow;"></div>
+						</div>
+						<div  id="elCover8"  style="display:inline-block;position:relative;">
+							<img src='http://jaehyunlee.co.kr:8080/image/jjhee_2.jpg' style="max-width: 200px;" />
+							<div id="elBox8" style="display:none;position:absolute;top:10px;left:10px;width:50px;height:50px;border:5px solid yellow;"></div>
+						</div>
+						<div  id="elCover9"  style="display:inline-block;position:relative;">
+							<img src='http://jaehyunlee.co.kr:8080/image/jang_1.jpg' style="max-width: 200px;" />
+							<div id="elBox9" style="display:none;position:absolute;top:10px;left:10px;width:50px;height:50px;border:5px solid yellow;"></div>
+						</div>
+						<div  id="elCover12"  style="display:inline-block;position:relative;">
+							<img src='http://jaehyunlee.co.kr:8080/image/bonobo.jpg' style="max-width: 200px;" />
+							<div id="elBox12" style="display:none;position:absolute;top:10px;left:10px;width:50px;height:50px;border:5px solid yellow;"></div>
+						</div>
+						<div  id="elCover2"  style="display:inline-block;position:relative;">
+							<img src='http://jaehyunlee.co.kr:8080/image/jhlee_2.jpg' style="max-width: 200px;" />
+							<div id="elBox2" style="display:none;position:absolute;top:10px;left:10px;width:50px;height:50px;border:5px solid yellow;"></div>
+						</div>
+						<div  id="elCover10"  style="display:inline-block;position:relative;">
+							<img src='http://jaehyunlee.co.kr:8080/image/jang_2.jpg' style="max-width: 200px;" />
+							<div id="elBox10" style="display:none;position:absolute;top:10px;left:10px;width:50px;height:50px;border:5px solid yellow;"></div>
+						</div>
+					</td>
+				</tr>
+				<tr>
+					<td id="elResult" colspan=2></td>
+				</tr>
+			</table>
+		</div>
+		<script src="ncase.js"></script>
+	</body>
+</html>

@@ -11,7 +11,7 @@ const token = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6ImQzN2I1NGEwLTgwN2It
 
 // userPost();
 // userPostUpdate();
-// userPostList();
+ userPostList();
 // getAllowedMmeber();
 // delPost();
 
@@ -30,7 +30,7 @@ const token = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6ImQzN2I1NGEwLTgwN2It
 // delSurvey();
 // getShareList();
 
-getShare();
+// getShare();
 
 function getShare() {
   const addr = url + port + '/api/post/share';   //끝에 슬래시를 붙이지 않는다.
@@ -363,8 +363,8 @@ function userPostList() {
   };
 
   const param = {    
-    // member_id: '5e25e7ce-0ea1-11ec-af59-0242ac110003',
-    member_id: 'f45a6d1e-1f9f-11ec-8bfa-0242ac110003',
+    member_id: '5e25e7ce-0ea1-11ec-af59-0242ac110003',
+    // member_id: 'f45a6d1e-1f9f-11ec-8bfa-0242ac110003',
     page: 1,
     temp: false,
     class: [],
@@ -376,6 +376,7 @@ function userPostList() {
   post(addr, param, header, res => {
     log(res);
     var data = JSON.parse(res);
+    dir(data);
     imgEl.src = res;
   });
 };

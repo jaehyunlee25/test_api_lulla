@@ -14,9 +14,50 @@ const token = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6ImQzN2I1NGEwLTgwN2It
 // sendChat();
 // readChat();
 // sendFile();
-// getList();
+ getList();
 // getRoom();
+// getChatMembers();
+// getCheck();
 
+function getCheck() {
+  const addr = url + port + '/api/send/chat/check';   //끝에 슬래시를 붙이지 않는다.
+  log(addr);
+  const header = { 
+    'Content-Type': 'application/json',
+    authorization: "Bearer " + token,
+  };
+
+  const param = {
+    member_id: '5e25e7ce-0ea1-11ec-af59-0242ac110003',
+    chat_room_id: 'cd926050-3c88-11ec-b0c1-0242ac110003',
+  };
+  console.dir(header);
+  console.dir(param);
+  post(addr, param, header, res => {
+    log(res);
+    var data = JSON.parse(res);
+    dir(data);
+  });
+};
+function getChatMembers() {
+  const addr = url + port + '/api/send/chat/chattables';   //끝에 슬래시를 붙이지 않는다.
+  log(addr);
+  const header = { 
+    'Content-Type': 'application/json',
+    authorization: "Bearer " + token,
+  };
+
+  const param = {
+    member_id: '5e25e7ce-0ea1-11ec-af59-0242ac110003',
+  };
+  console.dir(header);
+  console.dir(param);
+  post(addr, param, header, res => {
+    log(res);
+    var data = JSON.parse(res);
+    dir(data);
+  });
+};
 function getRoom() {
   const addr = url + port + '/api/send/chat/room';   //끝에 슬래시를 붙이지 않는다.
   log(addr);

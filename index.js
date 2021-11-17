@@ -1,12 +1,12 @@
 const header = { 'Content-Type': 'application/json' };
 
+/*
 const url = 'http://localhost:';
 const port = '3000';
-/*
+*/
 
 const url = 'http://dev.lulla.co.kr:';
 const port = '1000';
-*/
 
 const token = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6ImQzN2I1NGEwLTgwN2ItMTFlYi1iYzdjLWRmNGFjZWM3YTRkOSIsIm5hbWUiOiJqYWVoeXVubGVlIiwiZXhwIjoxNjY2Mjg2Mzg4LjAyNywiaWF0IjoxNjM1MTgyMzg4fQ.XWtuurXyvk-ertKA2ZRhfclzEIimOukSMML6K-QRVeo";
 
